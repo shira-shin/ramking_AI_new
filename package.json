@@ -1,0 +1,7 @@
+{
+  "name": "ramking_ai_new",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node scripts/checkEnv.js"
+  }
+}
