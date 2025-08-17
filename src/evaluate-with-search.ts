@@ -32,15 +32,29 @@ export async function evaluateWithSearch({ projectId, refresh = true }: Evaluate
 
   let searchResults: SearchResult[] = [];
   if (refresh) {
-    const searchResp = await fetch(`https://api.example.com/search?q=${encodeURIComponent(projectId)}`, {
-      headers: { 'X-API-Key': searchApiKey! }
-    });
-    const data = await searchResp.json();
-    const parsed = searchResultsSchema.safeParse(data);
-    if (!parsed.success) {
-      throw new Error('Invalid search results');
+    try {
+      const searchResp = await fetch(
+        `https://api.example.com/search?q=${encodeURIComponent(projectId)}`,
+        {
+          headers: { 'X-API-Key': searchApiKey! }
+        }
+      );
+
+      if (!searchResp.ok) {
+        const body = await searchResp.text();
+        throw new Error(`Search API error: ${searchResp.status} ${body}`);
+      }
+
+      const data = await searchResp.json();
+      const parsed = searchResultsSchema.safeParse(data);
+      if (!parsed.success) {
+        throw new Error('Invalid search results');
+      }
+      searchResults = parsed.data;
+    } catch (err) {
+      console.error('Search API request failed', err);
+      throw err;
     }
-    searchResults = parsed.data;
   }
 
   const aiResp = await fetch('https://api.openai.com/v1/responses', {
