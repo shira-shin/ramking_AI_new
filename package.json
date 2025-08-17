@@ -3,5 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "test": "node scripts/checkEnv.js"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
   }
 }

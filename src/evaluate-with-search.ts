@@ -1,7 +1,23 @@
+import { z } from 'zod';
+
 export interface EvaluateRequest {
   projectId: string;
   refresh?: boolean;
 }
+
+export interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
+const searchResultSchema = z.object({
+  title: z.string(),
+  url: z.string().url(),
+  snippet: z.string()
+});
+
+const searchResultsSchema = z.array(searchResultSchema);
 
 export async function evaluateWithSearch({ projectId, refresh = true }: EvaluateRequest) {
   const searchApiKey = process.env.SEARCH_API_KEY;
@@ -14,12 +30,17 @@ export async function evaluateWithSearch({ projectId, refresh = true }: Evaluate
     throw new Error('Missing SEARCH_API_KEY');
   }
 
-  let searchResults: unknown[] = [];
+  let searchResults: SearchResult[] = [];
   if (refresh) {
     const searchResp = await fetch(`https://api.example.com/search?q=${encodeURIComponent(projectId)}`, {
       headers: { 'X-API-Key': searchApiKey! }
     });
-    searchResults = await searchResp.json();
+    const data = await searchResp.json();
+    const parsed = searchResultsSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new Error('Invalid search results');
+    }
+    searchResults = parsed.data;
   }
 
   const aiResp = await fetch('https://api.openai.com/v1/responses', {
