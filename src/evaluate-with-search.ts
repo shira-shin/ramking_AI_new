@@ -16,10 +16,24 @@ export async function evaluateWithSearch({ projectId, refresh = true }: Evaluate
 
   let searchResults: unknown[] = [];
   if (refresh) {
-    const searchResp = await fetch(`https://api.example.com/search?q=${encodeURIComponent(projectId)}`, {
-      headers: { 'X-API-Key': searchApiKey! }
-    });
-    searchResults = await searchResp.json();
+    try {
+      const searchResp = await fetch(
+        `https://api.example.com/search?q=${encodeURIComponent(projectId)}`,
+        {
+          headers: { 'X-API-Key': searchApiKey! }
+        }
+      );
+
+      if (!searchResp.ok) {
+        const body = await searchResp.text();
+        throw new Error(`Search API error: ${searchResp.status} ${body}`);
+      }
+
+      searchResults = await searchResp.json();
+    } catch (err) {
+      console.error('Search API request failed', err);
+      throw err;
+    }
   }
 
   const aiResp = await fetch('https://api.openai.com/v1/responses', {
