@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.env*
+
+# other typical ignores
+npm-debug.log*
+.DS_Store
+
