@@ -12,10 +12,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "env:check": "node scripts/checkEnv.mjs",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed",
-    "test:ci": "npm run env:check && npm run typecheck && npm run lint && npm run build"
+    "db:seed": "tsx prisma/seed.ts",
+    "test:ci": "npm run env:check && npm run typecheck && npm run lint && npm run build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^5.15.1",
     "next": "14.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -25,6 +27,8 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "eslint": "8.57.0",
+    "prisma": "^5.15.1",
+    "tsx": "^4.7.3",
     "typescript": "5.4.5"
   }
 }
