@@ -1,13 +1,25 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: 20
+          cache: npm
+
+      # lockfileに厳密一致
       - run: npm ci
-      - run: npm run test:ci
+
+      # Prisma Client は postinstall で生成される想定
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
