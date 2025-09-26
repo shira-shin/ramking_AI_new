@@ -1,33 +1,25 @@
 name: Regen Lockfile
-on:
-  workflow_dispatch: {}
+on: { workflow_dispatch: {} }
+
 jobs:
   regen:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
-          cache: npm
-
-      - name: Clean & install
+          cache: 'npm'
+      - name: Clean & install to regenerate lock
         run: |
-          rm -rf node_modules package-lock.json yarn.lock pnpm-lock.yaml
-          npm config set fetch-retries 5
-          npm config set fetch-retry-maxtimeout 120000
+          rm -rf node_modules package-lock.json
           npm install --no-audit --no-fund
-          npx prisma generate || true
-
-      - name: Create PR with updated lockfile
+      - name: Commit lockfile as PR
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "chore(lock): regenerate package-lock.json on clean runner"
-          title: "chore(lock): regenerate package-lock.json"
-          body: "Regenerated lockfile to fix CI 'Missing from lock file' errors."
-          branch: chore/regen-lock
+          commit-message: "chore(lock): regenerate package-lock.json incl. TypeScript types"
+          title: "chore(lock): regenerate npm lockfile (add @types/*)"
+          branch: chore/regen-lock-types
           add-paths: |
             package-lock.json
             package.json

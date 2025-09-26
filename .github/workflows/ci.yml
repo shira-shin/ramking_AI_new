@@ -43,19 +43,15 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
         run: npm run build --silent
 
-      - name: Show last npm logs
+      - name: Print npm debug log on failure
         if: failure()
         run: |
-          echo "==== npm logs (latest) ===="
-          LOG_DIR="$HOME/.npm/_logs"
-          ls -lat "$LOG_DIR" || true
-          LAST=$(ls -1t "$LOG_DIR"/* 2>/dev/null | head -n1 || true)
-          [ -f "$LAST" ] && tail -n 200 "$LAST" || echo "no npm log found"
+          find ~/.npm/_logs -type f -name "*-debug-0.log" -print -exec tail -n +1 {} \;
 
-      - name: Upload npm logs artifact
+      - name: Upload npm logs (artifact)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: npm-logs
-          path: ~/.npm/_logs/*
+          name: npm-debug-logs
+          path: ~/.npm/_logs/*-debug-0.log
           if-no-files-found: ignore
