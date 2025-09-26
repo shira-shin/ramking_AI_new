@@ -1,90 +1,71 @@
-"use client";
-import { useState } from "react";
+import Link from "next/link";
 
-type Result = { item: string; score: number; reason?: string };
+import { AuthButton } from "@/components/AuthButton";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
-  const [criteria, setCriteria] = useState('{\n  "clarity": 1,\n  "creativity": 1\n}');
-  const [candidates, setCandidates] = useState('A,B,C');
-  const [results, setResults] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const features = [
+  {
+    title: "AI-driven rankings",
+    description: "Leverage OpenAI to synthesize complex criteria into clear, explainable results.",
+  },
+  {
+    title: "Collaborative criteria",
+    description: "Capture your team's priorities with JSON definitions or intuitive sliders.",
+  },
+  {
+    title: "Secure access",
+    description: "Sign in with Google to keep your rankings private and synced across sessions.",
+  },
+];
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResults([]);
-    try {
-      // API に JSON で投げる（フォームPOSTより確実）
-      const res = await fetch("/api/evaluate-with-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          criteria: JSON.parse(criteria || "{}"),
-          candidates: candidates.split(",").map(s => s.trim()).filter(Boolean),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
-      setResults(data.results as Result[]);
-    } catch (err: any) {
-      setError(err?.message ?? "Request failed");
-    } finally {
-      setLoading(false);
-    }
-  }
+export default async function HomePage() {
+  const session = await auth();
 
   return (
-    <main className="p-8 max-w-3xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Ranking AI</h1>
-      <p className="text-gray-600">JSON の評価基準と候補リストからランキングを生成します。</p>
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <label className="block">
-          <span className="font-medium">Criteria (JSON)</span>
-          <textarea
-            value={criteria}
-            onChange={(e) => setCriteria(e.target.value)}
-            rows={8}
-            className="w-full border p-2 rounded"
-          />
-        </label>
-        <label className="block">
-          <span className="font-medium">Candidates (comma-separated)</span>
-          <input
-            value={candidates}
-            onChange={(e) => setCandidates(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
-        >
-          {loading ? "Ranking..." : "Rank now"}
-        </button>
-      </form>
-
-      {error && (
-        <div className="text-red-600">Error: {error}</div>
-      )}
-
-      {results.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold mt-6">Results</h2>
-          <ol className="list-decimal pl-6">
-            {results.map((r, i) => (
-              <li key={r.item} className="leading-7">
-                <span className="font-semibold">{i + 1}. {r.item}</span>
-                <span className="ml-2 text-sm text-gray-500">score: {r.score}</span>
-                {r.reason ? <span className="ml-2 text-sm text-gray-400">({r.reason})</span> : null}
-              </li>
-            ))}
-          </ol>
+    <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
+      <section className="grid gap-10 md:grid-cols-[3fr,2fr] md:items-center">
+        <div className="space-y-6">
+          <div className="inline-flex items-center rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+            Powered by Next.js 14 & OpenAI
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+            Rank your options with confidence.
+          </h1>
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            Ranking AI helps teams and founders prioritize ideas, candidates, and initiatives. Define your evaluation criteria,
+            submit contenders, and receive transparent AI-backed scoring in seconds.
+          </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <AuthButton />
+            {session?.user ? (
+              <Button asChild>
+                <Link href="/dashboard">Open dashboard</Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline">
+                <Link href="/dashboard">Explore the dashboard</Link>
+              </Button>
+            )}
+          </div>
         </div>
-      )}
+        <div className="grid gap-4">
+          {features.map((feature) => (
+            <Card key={feature.title} className="border-primary/10 bg-card/40 backdrop-blur">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardDescription>{feature.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground">
+                  Make decision-making faster by capturing subjective and objective measures in a repeatable workflow.
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
