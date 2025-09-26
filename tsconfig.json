@@ -15,7 +15,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "app/*"
+        "app/*",
+        "components/*",
+        "lib/*"
       ]
     },
     "jsx": "react-jsx",
