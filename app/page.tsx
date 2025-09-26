@@ -1,90 +1,57 @@
-"use client";
-import { useState } from "react";
+import Link from "next/link";
+import { Brain, MessageSquareText, UsersRound } from "lucide-react";
+import { AuthButton } from "@/components/AuthButton";
+import { cn } from "@/lib/utils";
 
-type Result = { item: string; score: number; reason?: string };
+const primaryCtaClasses = cn(
+  "inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-black/90"
+);
 
-export default function Home() {
-  const [criteria, setCriteria] = useState('{\n  "clarity": 1,\n  "creativity": 1\n}');
-  const [candidates, setCandidates] = useState('A,B,C');
-  const [results, setResults] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResults([]);
-    try {
-      // API に JSON で投げる（フォームPOSTより確実）
-      const res = await fetch("/api/evaluate-with-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          criteria: JSON.parse(criteria || "{}"),
-          candidates: candidates.split(",").map(s => s.trim()).filter(Boolean),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
-      setResults(data.results as Result[]);
-    } catch (err: any) {
-      setError(err?.message ?? "Request failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export default function HomePage() {
   return (
-    <main className="p-8 max-w-3xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Ranking AI</h1>
-      <p className="text-gray-600">JSON の評価基準と候補リストからランキングを生成します。</p>
+    <main className="mx-auto flex min-h-[80vh] max-w-4xl flex-col items-center justify-center gap-10 px-6 text-center">
+      <div className="space-y-4">
+        <span className="rounded-full bg-black/5 px-4 py-1 text-xs font-medium uppercase tracking-wide text-gray-600">
+          Ranking AI workspace
+        </span>
+        <h1 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+          Compare candidates with AI-assisted scoring
+        </h1>
+        <p className="text-lg text-gray-600 sm:text-xl">
+          Define the evaluation criteria, invite the AI to weigh each candidate, and share actionable reasoning with your team.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <label className="block">
-          <span className="font-medium">Criteria (JSON)</span>
-          <textarea
-            value={criteria}
-            onChange={(e) => setCriteria(e.target.value)}
-            rows={8}
-            className="w-full border p-2 rounded"
-          />
-        </label>
-        <label className="block">
-          <span className="font-medium">Candidates (comma-separated)</span>
-          <input
-            value={candidates}
-            onChange={(e) => setCandidates(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
-        >
-          {loading ? "Ranking..." : "Rank now"}
-        </button>
-      </form>
+      <div className="flex flex-col items-center gap-3 sm:flex-row">
+        <Link href="/dashboard" className={primaryCtaClasses}>
+          Go to dashboard
+        </Link>
+        <AuthButton />
+      </div>
 
-      {error && (
-        <div className="text-red-600">Error: {error}</div>
-      )}
-
-      {results.length > 0 && (
+      <div className="grid w-full gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-left shadow-sm sm:grid-cols-3">
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold mt-6">Results</h2>
-          <ol className="list-decimal pl-6">
-            {results.map((r, i) => (
-              <li key={r.item} className="leading-7">
-                <span className="font-semibold">{i + 1}. {r.item}</span>
-                <span className="ml-2 text-sm text-gray-500">score: {r.score}</span>
-                {r.reason ? <span className="ml-2 text-sm text-gray-400">({r.reason})</span> : null}
-              </li>
-            ))}
-          </ol>
+          <Brain className="h-6 w-6 text-black" />
+          <h2 className="text-lg font-semibold text-gray-900">Guided criteria</h2>
+          <p className="text-sm text-gray-600">
+            Start from proven templates like balanced, storytelling, or data-driven, then tweak the weights to match your review.
+          </p>
         </div>
-      )}
+        <div className="space-y-2">
+          <UsersRound className="h-6 w-6 text-black" />
+          <h2 className="text-lg font-semibold text-gray-900">Collaborative inputs</h2>
+          <p className="text-sm text-gray-600">
+            Capture candidate details dynamically and keep everything in sync thanks to a shared state powered by Zustand.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <MessageSquareText className="h-6 w-6 text-black" />
+          <h2 className="text-lg font-semibold text-gray-900">Explainable rankings</h2>
+          <p className="text-sm text-gray-600">
+            Each AI generated score arrives with a reason so stakeholders understand the trade-offs behind the ordering.
+          </p>
+        </div>
+      </div>
     </main>
   );
 }
