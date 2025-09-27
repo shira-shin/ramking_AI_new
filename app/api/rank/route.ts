@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
-import { rankCandidates } from "@/lib/openai";
+
+import { getOpenAI, rankCandidates } from "@/lib/openai";
 
 type RequestPayload = {
   criteria?: Record<string, number>;
   candidates?: string[];
 };
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export async function GET() {
+  const hasKey = Boolean(process.env.OPENAI_API_KEY?.trim());
+  return NextResponse.json({ ok: true, openai: hasKey ? "configured" : "missing" });
+}
 
 export async function POST(request: Request) {
   try {
@@ -14,6 +24,10 @@ export async function POST(request: Request) {
 
     if (!candidates.length) {
       return NextResponse.json({ ok: false, error: "At least one candidate is required" }, { status: 400 });
+    }
+
+    if (!getOpenAI()) {
+      return NextResponse.json({ ok: false, error: "OPENAI_API_KEY is not set" }, { status: 503 });
     }
 
     const results = await rankCandidates(criteria, candidates);
