@@ -2,15 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 追加の全体スタイル */
+:root {
+  --radius: 12px;
+}
+html, body {
+  height: 100%;
+}
 body {
-  font-family: var(--font-inter, ui-sans-serif, system-ui);
+  @apply bg-gray-50 text-gray-900 antialiased;
 }
-
-a {
-  color: inherit;
-  text-decoration: none;
+.container-narrow {
+  @apply max-w-5xl mx-auto px-4;
 }
-
-* {
-  scroll-behavior: smooth;
+.section {
+  @apply py-12 md:py-16;
+}
+.card {
+  @apply rounded-2xl border border-gray-200 bg-white shadow-sm p-6;
 }
