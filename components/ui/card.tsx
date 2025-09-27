@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export const Card = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md",
+      "rounded-xl border border-gray-100 bg-white shadow-card",
       className,
     )}
     {...props}
@@ -12,7 +12,7 @@ export const Card = ({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 );
 
 export const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("border-b border-gray-100 px-6 py-4", className)} {...props} />
+  <div className={cn("border-b border-gray-100 px-5 py-4", className)} {...props} />
 );
 
 export const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
@@ -24,9 +24,13 @@ export const CardDescription = ({ className, ...props }: React.HTMLAttributes<HT
 );
 
 export const CardContent = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("px-6 py-4", className)} {...props} />
+  <div className={cn("px-5 py-4", className)} {...props} />
+);
+
+export const CardBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("px-5 py-4", className)} {...props} />
 );
 
 export const CardFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex items-center gap-2 px-6 py-4", className)} {...props} />
+  <div className={cn("flex items-center gap-2 px-5 py-4", className)} {...props} />
 );
