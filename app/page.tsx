@@ -1,5 +1,11 @@
 import Link from 'next/link';
 
+import { SignOutButton } from '@/components/SignOutButton';
+
+const hasGoogleAuth = Boolean(
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+);
+
 export default function Home() {
   return (
     <main>
@@ -17,16 +23,11 @@ export default function Home() {
             <div className="flex items-center justify-center gap-3">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center rounded-xl bg-indigo-600 px-5 py-3 text-white font-medium shadow hover:bg-indigo-700 transition"
+                className="inline-flex items-center rounded-xl bg-indigo-600 px-5 py-3 text-white font-medium shadow transition hover:bg-indigo-700"
               >
                 ダッシュボードへ移動
               </Link>
-              <Link
-                href="/api/auth/signout"
-                className="inline-flex items-center rounded-xl border border-gray-300 px-5 py-3 text-gray-700 font-medium hover:bg-gray-50 transition"
-              >
-                サインアウト
-              </Link>
+              {hasGoogleAuth ? <SignOutButton /> : null}
             </div>
           </div>
         </div>
