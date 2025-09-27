@@ -70,8 +70,8 @@ export const useRankingStore = create<RankingState>((set) => ({
 
 export const templates: Record<string, { label: string; description: string; criteria: Record<string, number> }> = {
   balanced: {
-    label: "Balanced",
-    description: "Equal focus on clarity, creativity, and impact.",
+    label: "バランス型",
+    description: "分かりやすさ・創造性・インパクトを均等に評価します。",
     criteria: {
       clarity: 4,
       creativity: 4,
@@ -79,8 +79,8 @@ export const templates: Record<string, { label: string; description: string; cri
     },
   },
   storytelling: {
-    label: "Storytelling",
-    description: "Higher weight for creativity and narrative strength.",
+    label: "ストーリーテリング重視",
+    description: "創造性とストーリー性を強調しつつ、一定の分かりやすさも担保します。",
     criteria: {
       clarity: 3,
       creativity: 5,
@@ -88,8 +88,8 @@ export const templates: Record<string, { label: string; description: string; cri
     },
   },
   data_driven: {
-    label: "Data Driven",
-    description: "Prioritise clarity and measurable impact.",
+    label: "データドリブン",
+    description: "定量的な根拠と分かりやすさを優先し、説得力のある提案を重視します。",
     criteria: {
       clarity: 5,
       creativity: 2,
