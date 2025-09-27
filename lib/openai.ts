@@ -8,14 +8,19 @@ type RankingItem = {
   reason: string;
 };
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getClient() {
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) {
+    return null;
+  }
+  return new OpenAI({ apiKey: key });
+}
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 export async function rankCandidates(criteria: Criteria, candidates: string[]): Promise<RankingItem[]> {
-  if (!process.env.OPENAI_API_KEY) {
+  const client = getClient();
+  if (!client) {
     throw new Error("OPENAI_API_KEY is not configured.");
   }
 
