@@ -14,7 +14,7 @@ export function AuthButton() {
   if (!session) {
     return (
       <Button onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>
-        Sign in with Google
+        Google でサインイン
       </Button>
     );
   }
@@ -23,7 +23,7 @@ export function AuthButton() {
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-600">{session.user?.name ?? session.user?.email}</span>
       <Button variant="outline" onClick={() => signOut({ callbackUrl: "/" })}>
-        Sign out
+        サインアウト
       </Button>
     </div>
   );
