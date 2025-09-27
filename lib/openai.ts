@@ -8,61 +8,81 @@ type RankingItem = {
   reason: string;
 };
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export class MissingOpenAIKeyError extends Error {
+  constructor() {
+    super("OPENAI_API_KEY is not configured.");
+    this.name = "MissingOpenAIKeyError";
+  }
+}
+
+/** Never instantiate at module scope. */
+export function getOpenAI() {
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) return null;
+  return new OpenAI({ apiKey: key });
+}
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
-export async function rankCandidates(criteria: Criteria, candidates: string[]): Promise<RankingItem[]> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not configured.");
-  }
+const SYSTEM_PROMPT =
+  "You are a ranking assistant. Given weighted criteria and a list of candidates, " +
+  "respond with strict JSON of the form {\"results\":[{\"candidate\":string,\"score\":number,\"reason\":string},...]}. " +
+  "Scores must be numbers between 0 and 100 inclusive and the array must be sorted descending by score.";
 
-  const prompt = [
-    `Criteria: ${JSON.stringify(criteria, null, 2)}`,
-    `Candidates: ${candidates.join(", ")}`,
-  ].join("\n\n");
+function normaliseResults(results: any[]): RankingItem[] {
+  return results
+    .map((item) => ({
+      candidate: typeof item?.candidate === "string" ? item.candidate : String(item?.candidate ?? ""),
+      score: Number.isFinite(Number(item?.score)) ? Number(item.score) : 0,
+      reason: typeof item?.reason === "string" ? item.reason : String(item?.reason ?? ""),
+    }))
+    .filter((item) => item.candidate.trim().length > 0)
+    .map((item) => ({
+      ...item,
+      score: Math.max(0, Math.min(100, item.score)),
+    }))
+    .sort((a, b) => b.score - a.score);
+}
 
-  const response = await client.chat.completions.create({
+export async function rankCandidatesWithClient(
+  client: OpenAI,
+  criteria: Criteria,
+  candidates: string[],
+): Promise<RankingItem[]> {
+  const user = `criteria: ${JSON.stringify(criteria)}\ncandidates: ${JSON.stringify(candidates)}`;
+
+  const response = await client.responses.create({
     model: DEFAULT_MODEL,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an AI ranking assistant. Rank the given candidates based on the provided criteria. Return JSON with a 'rankings' array where each item includes: candidate (string), score (number from 0 to 100), and reason (string).",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
+    input: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: user },
     ],
+    response_format: { type: "json_object" },
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
+  const text = response.output_text?.trim();
+  if (!text) {
     throw new Error("OpenAI did not return any content.");
   }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(content);
+    parsed = JSON.parse(text);
   } catch (error) {
     throw new Error("Failed to parse OpenAI response as JSON.");
   }
 
-  if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as any).rankings)) {
-    throw new Error("OpenAI response missing 'rankings' array.");
+  if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as any).results)) {
+    throw new Error("OpenAI response missing 'results' array.");
   }
 
-  return (parsed as any).rankings
-    .map((item: any) => ({
-      candidate: String(item.candidate),
-      score: Number(item.score),
-      reason: item.reason ? String(item.reason) : "",
-    }))
-    .filter((item: RankingItem) => item.candidate.trim().length > 0)
-    .sort((a: RankingItem, b: RankingItem) => b.score - a.score);
+  return normaliseResults((parsed as any).results);
+}
+
+export async function rankCandidates(criteria: Criteria, candidates: string[]): Promise<RankingItem[]> {
+  const client = getOpenAI();
+  if (!client) {
+    throw new MissingOpenAIKeyError();
+  }
+  return rankCandidatesWithClient(client, criteria, candidates);
 }
