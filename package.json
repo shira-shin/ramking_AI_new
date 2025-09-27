@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "@tailwindcss/postcss": "^8",
+    "@tailwindcss/postcss": "^9.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
