@@ -8,14 +8,26 @@ type RankingItem = {
   reason: string;
 };
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let client: OpenAI | null = null;
+
+export function getOpenAI(): OpenAI | null {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    return null;
+  }
+
+  if (!client) {
+    client = new OpenAI({ apiKey });
+  }
+
+  return client;
+}
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 export async function rankCandidates(criteria: Criteria, candidates: string[]): Promise<RankingItem[]> {
-  if (!process.env.OPENAI_API_KEY) {
+  const openai = getOpenAI();
+  if (!openai) {
     throw new Error("OPENAI_API_KEY is not configured.");
   }
 
@@ -24,7 +36,7 @@ export async function rankCandidates(criteria: Criteria, candidates: string[]): 
     `Candidates: ${candidates.join(", ")}`,
   ].join("\n\n");
 
-  const response = await client.chat.completions.create({
+  const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
     temperature: 0.2,
     response_format: { type: "json_object" },
