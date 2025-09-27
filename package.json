@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "@tailwindcss/postcss": "^9.0.0",
+    "@tailwindcss/postcss": "latest",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -23,9 +23,10 @@
     "openai": "^4.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "tailwindcss": "4.0.0",
+    "tailwindcss": "latest",
     "typescript": "^5.6.3",
-    "zustand": "^4.4.0"
+    "zustand": "^4.4.0",
+    "autoprefixer": "latest"
   },
   "devDependencies": {
     "prisma": "^5.22.0"
